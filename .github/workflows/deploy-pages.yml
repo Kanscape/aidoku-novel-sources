@@ -21,7 +21,6 @@ concurrency:
 permissions:
   contents: read
   actions: read
-  deployments: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -107,4 +106,3 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy public --project-name=${{ env.PAGES_PROJECT_NAME }} --branch=main --commit-dirty=true
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
