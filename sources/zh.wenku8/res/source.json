@@ -1,0 +1,29 @@
+{
+	"info": {
+		"id": "zh.wenku8",
+		"name": "轻小说文库",
+		"version": 1,
+		"url": "https://www.wenku8.net",
+		"contentRating": 0,
+		"minAppVersion": "0.8.2",
+		"languages": ["zh"]
+	},
+	"listings": [
+		{
+			"id": "completed",
+			"name": "完结全本"
+		},
+		{
+			"id": "updated",
+			"name": "今日更新"
+		},
+		{
+			"id": "new",
+			"name": "新书一览"
+		}
+	],
+	"config": {
+		"supportsAuthorSearch": true,
+		"supportsTagSearch": true
+	}
+}

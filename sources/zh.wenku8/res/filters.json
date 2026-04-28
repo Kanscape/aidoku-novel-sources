@@ -1,0 +1,10 @@
+[
+	{
+		"type": "select",
+		"id": "search_type",
+		"title": "搜索方式",
+		"options": ["按书名搜索", "按作者搜索"],
+		"ids": ["articlename", "author"],
+		"default": "articlename"
+	}
+]

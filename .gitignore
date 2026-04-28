@@ -1,0 +1,9 @@
+/target
+target/
+sources/*/target/
+sources/*/package.aix
+public/icons/
+public/sources/
+public/index.json
+public/index.min.json
+.DS_Store

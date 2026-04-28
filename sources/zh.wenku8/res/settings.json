@@ -1,0 +1,21 @@
+[
+	{
+		"type": "group",
+		"title": "账号",
+		"footer": "Wenku8 需要登录后访问，请在网页登录页完成 Cloudflare 验证和登录。",
+		"items": [
+			{
+				"type": "login",
+				"method": "web",
+				"key": "login",
+				"title": "登录 Wenku8",
+				"logoutTitle": "退出登录",
+				"url": "http://www.wenku8.net/login.php",
+				"refreshes": [
+					"listings",
+					"content"
+				]
+			}
+		]
+	}
+]
