@@ -6,4 +6,13 @@ public/icons/
 public/sources/
 public/index.json
 public/index.min.json
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.mobileprovision
+secrets.*
 .DS_Store
