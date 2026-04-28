@@ -61,10 +61,7 @@ pub(crate) fn tags_filter() -> Filter {
     let tags = match fetch_tags() {
         Ok(tags) if !tags.is_empty() => tags,
         Ok(_) => known_tags(),
-        Err(err) => {
-            println!("[Wenku8] tags filter uses bundled list: {err:?}");
-            known_tags()
-        }
+        Err(_) => known_tags(),
     };
 
     let mut options: Vec<Cow<'static, str>> = vec!["全部".into()];

@@ -1,5 +1,5 @@
 use aidoku::{
-    HashMap, Result,
+    Result,
     alloc::{String, string::ToString},
     imports::{
         defaults::defaults_get_map,
@@ -40,16 +40,6 @@ pub(crate) fn request_html(url: &str) -> Result<Document> {
     let data = response.get_data()?;
     let (decoded, _, _) = GBK.decode(&data);
     let html = decoded.into_owned();
-    println!(
-        "[Wenku8] html status={}, bytes={}, cf={}, login_form={}, login_notice={}, content={}, catalog={}",
-        status,
-        data.len(),
-        looks_like_cloudflare(&html),
-        looks_like_login_form(&html),
-        looks_like_login_notice(&html),
-        html.contains("id=\"content\"") || html.contains("id=content"),
-        html.contains("class=\"css\"") || html.contains("class=css")
-    );
 
     if status == 403
         || response
@@ -71,13 +61,8 @@ pub(crate) fn request_html(url: &str) -> Result<Document> {
 }
 
 pub(crate) fn request(url: &str) -> Result<Response> {
-    let (cookie, cookie_names) = cookie_header();
+    let cookie = cookie_header();
     let request_url = append_charset(&network_url(url));
-    println!(
-        "[Wenku8] GET {} cookies={}",
-        log_url(&request_url),
-        cookie_names
-    );
     let mut request = Request::get(request_url)?
         .header("User-Agent", USER_AGENT)
         .header("Referer", BASE_URL)
@@ -85,24 +70,12 @@ pub(crate) fn request(url: &str) -> Result<Response> {
     if !cookie.is_empty() {
         request = request.header("Cookie", cookie.as_str());
     }
-    let response = request.send()?;
-    let status = response.status_code();
-    let cf_header = response
-        .get_header("cf-mitigated")
-        .as_deref()
-        .is_some_and(|value| value.contains("challenge"));
-    println!("[Wenku8] status={status} cf_header={cf_header}");
-    Ok(response)
+    Ok(request.send()?)
 }
 
 pub(crate) fn request_html_webview(url: &str) -> Result<Document> {
-    let (cookie, cookie_names) = cookie_header();
+    let cookie = cookie_header();
     let request_url = append_charset(&network_url(url));
-    println!(
-        "[Wenku8] WebView GET {} cookies={}",
-        log_url(&request_url),
-        cookie_names
-    );
     let mut request = Request::get(request_url)?
         .header("User-Agent", USER_AGENT)
         .header("Referer", BASE_URL)
@@ -114,15 +87,6 @@ pub(crate) fn request_html_webview(url: &str) -> Result<Document> {
     let webview = WebView::new();
     webview.load_blocking(request)?;
     let html = webview.eval("document.documentElement.outerHTML")?;
-    println!(
-        "[Wenku8] webview html bytes={}, cf={}, login_form={}, login_notice={}, content={}, catalog={}",
-        html.len(),
-        looks_like_cloudflare(&html),
-        looks_like_login_form(&html),
-        looks_like_login_notice(&html),
-        html.contains("id=\"content\"") || html.contains("id=content"),
-        html.contains("class=\"css\"") || html.contains("class=css")
-    );
 
     if looks_like_cloudflare(&html) {
         bail!("Wenku8 返回 Cloudflare 验证");
@@ -134,9 +98,8 @@ pub(crate) fn request_html_webview(url: &str) -> Result<Document> {
     Ok(Html::parse_with_url(html.as_bytes(), url)?)
 }
 
-pub(crate) fn cookie_header() -> (String, String) {
+pub(crate) fn cookie_header() -> String {
     let cookies = defaults_get_map("login").unwrap_or_default();
-    let names = cookie_names(&cookies);
 
     let mut header = String::new();
     for (key, value) in cookies {
@@ -147,10 +110,10 @@ pub(crate) fn cookie_header() -> (String, String) {
         header.push('=');
         header.push_str(&value);
     }
-    (header, names)
+    header
 }
 
-pub(crate) fn has_auth_cookie(cookies: &HashMap<String, String>) -> bool {
+pub(crate) fn has_auth_cookie(cookies: &aidoku::HashMap<String, String>) -> bool {
     cookies
         .get("jieqiUserInfo")
         .is_some_and(|value| !value.trim().is_empty())
@@ -160,29 +123,6 @@ pub(crate) fn has_auth_cookie(cookies: &HashMap<String, String>) -> bool {
         || cookies
             .get("PHPSESSID")
             .is_some_and(|value| !value.trim().is_empty())
-}
-
-pub(crate) fn cookie_names(cookies: &HashMap<String, String>) -> String {
-    if cookies.is_empty() {
-        return "(none)".into();
-    }
-
-    let mut names = String::new();
-    for key in cookies.keys() {
-        if !names.is_empty() {
-            names.push(',');
-        }
-        names.push_str(key);
-    }
-    names
-}
-
-pub(crate) fn log_url(url: &str) -> String {
-    if let Some((prefix, _)) = url.split_once('?') {
-        format!("{prefix}?...")
-    } else {
-        url.to_string()
-    }
 }
 
 pub(crate) fn append_charset(url: &str) -> String {

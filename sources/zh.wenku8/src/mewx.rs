@@ -23,7 +23,6 @@ pub(crate) fn search_page(search_type: &str, query: &str, page: i32) -> Result<M
 
 pub(crate) fn mewx_api(request: &str) -> Result<String> {
     let body = mewx_form_body(request);
-    println!("[Wenku8] MewX POST request={}", log_mewx_request(request));
     let response = Request::post(MEWX_RELAY_URL)?
         .header("User-Agent", MEWX_USER_AGENT)
         .header("Content-Type", "application/x-www-form-urlencoded")
@@ -32,12 +31,6 @@ pub(crate) fn mewx_api(request: &str) -> Result<String> {
         .send()?;
     let status = response.status_code();
     let text = response.get_string()?;
-    println!(
-        "[Wenku8] MewX status={}, bytes={}, items={}",
-        status,
-        text.len(),
-        text.matches("<item").count()
-    );
     if !(200..300).contains(&status) {
         bail!("MewX relay 请求失败：HTTP {status}");
     }
@@ -203,14 +196,6 @@ pub(crate) fn xml_text_value(raw: &str) -> String {
         inner.trim().to_string()
     } else {
         decode_basic_entities(text).trim().to_string()
-    }
-}
-
-pub(crate) fn log_mewx_request(request: &str) -> String {
-    if let Some((prefix, _)) = request.split_once("searchkey=") {
-        format!("{prefix}searchkey=...")
-    } else {
-        request.to_string()
     }
 }
 

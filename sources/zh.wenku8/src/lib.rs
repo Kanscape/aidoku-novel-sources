@@ -26,7 +26,7 @@ use filters::{parse_search_filters, tag_page, tags_filter};
 use home::parse_home;
 use listing::list_page;
 use mewx::search_page;
-use net::{cookie_header, cookie_names, has_auth_cookie, request_html};
+use net::{cookie_header, has_auth_cookie, request_html};
 use util::{extract_chapter_keys, extract_manga_key};
 
 struct Wenku8;
@@ -162,7 +162,7 @@ impl ImageRequestProvider for Wenku8 {
         url: String,
         _context: Option<aidoku::PageContext>,
     ) -> Result<Request> {
-        let (cookie, _) = cookie_header();
+        let cookie = cookie_header();
         let mut request = Request::get(url)?
             .header("User-Agent", USER_AGENT)
             .header("Referer", BASE_URL);
@@ -195,11 +195,6 @@ impl WebLoginHandler for Wenku8 {
         if key != "login" {
             bail!("无效登录项：{key}");
         }
-        println!(
-            "[Wenku8] web login cookies: {}; auth={}",
-            cookie_names(&cookies),
-            has_auth_cookie(&cookies)
-        );
         Ok(has_auth_cookie(&cookies))
     }
 }
